@@ -13,7 +13,7 @@ type=sys.argv[2]
 magD=MagD(config_path,type)
 pm=PlotMagD(magD,type)
 
-magD.read_vectors()
+magD.read_grids()
 
 fig=pm.plot().figure(figsize=(10,12))
 pm.plot().rc("font", size=14)
@@ -28,7 +28,8 @@ map.drawcountries(zorder=2)
 
 # levels=pm.create_contour_levels(detect_vector, 2)
 X,Y=pm.project_x_y(map)
-Z= pm.make_matrix(len(magD.lat_list()), len(magD.lon_list()))
+# Z= pm.make_matrix(len(magD.lat_list()), len(magD.lon_list()))
+Z=pm.process_grid()
 if pm.type=="detection":
     pm.plot().pcolormesh(X,Y,Z,zorder=0, vmin=pm.mag_min, vmax=pm.mag_max)
 else:

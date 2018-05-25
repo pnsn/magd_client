@@ -8,5 +8,5 @@ if len(sys.argv)<2:
     exit(1)
 config_path =sys.argv[1]
 magD=MagD(config_path)
-out=magD.create_vectors()
+out=magD.create_grids()
 print(out)
