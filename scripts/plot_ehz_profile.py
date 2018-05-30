@@ -1,8 +1,14 @@
 import sys
 import os
+import numpy as np
+import math
 
 from magD.plotMagD import PlotMagD
 from magD.magD import MagD
+from matplotlib.colors import BoundaryNorm
+from matplotlib.ticker import MaxNLocator
+
+
 if len(sys.argv)<3:
     print("provide config path as first arg and map output type for second arg")
     print("Example: python scripts/ehz_profile.py config/ehz_profile/ehz_and_bb.ini detection")
@@ -20,7 +26,7 @@ pm.plot().rc("font", size=14)
 
 bounds=(magD.lat_min, magD.lat_max, magD.lon_min, magD.lon_max)
 map=pm.basemap(bounds)
-map.drawcoastlines(zorder=1)
+map.drawcoastlines(zorder=2)
 map.drawstates(zorder=2)
 map.drawcountries(zorder=2)
 
@@ -28,13 +34,51 @@ map.drawcountries(zorder=2)
 
 # levels=pm.create_contour_levels(detect_vector, 2)
 X,Y=pm.project_x_y(map)
-# Z= pm.make_matrix(len(magD.lat_list()), len(magD.lon_list()))
-Z=pm.process_grid()
-if pm.type=="detection":
-    pm.plot().pcolormesh(X,Y,Z,zorder=0, vmin=pm.mag_min, vmax=pm.mag_max)
+
+#make grids and compare if needed
+grids=[]
+
+for g in [magD.grid, magD.other_grid]:
+    if g:
+        grid=[]
+        mat=g.matrix
+        max=np.max(mat)
+        for row in g.matrix:
+            if g.type=="distance":
+                r=[math.log(distance)/math.log(max) for distance in row]
+            elif g.type=="gap":
+                r=[gap/max for gap in row]
+            else:
+                r=row
+            grid.append(r)
+        grids.append(grid)
+
+
+#are we comparing two grids?
+if magD.other_grid:
+    this_grid, other_grid= grids
+    composite_grid=[]
+    for i in range(len(this_grid)):
+        if magD.compare_operator=='diff':
+            r =[a - b  for a, b in zip(this_grid[i], other_grid[i])]
+        if magD.compare_operator=='sum':
+            r =[(a + b)*0.5  for a, b in zip(this_grid[i], other_grid[i])]
+        composite_grid.append(r)
+    Z=np.array(composite_grid)
 else:
-    pm.plot().pcolormesh(X,Y,Z,zorder=0)
-pm.plot().colorbar()
+    Z=np.array(grids[0])
+X=np.array(X) + 0.5/2.
+Y=np.array(Y) + 0.5/2.
+levels = MaxNLocator(nbins=10).tick_values(np.min(Z), np.max(Z))
+cmap = pm.plot().get_cmap('Blues')
+norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
+
+# if pm.type=="detection":
+    # cm=pm.plot().pcolormesh(X,Y,Z,zorder=0, vmin=pm.mag_min, vmax=pm.mag_max)
+# else:
+cf = pm.plot().contourf(X, Y, Z, levels=levels, cmap=cmap)
+    # cm=pm.plot().pcolormesh(X,Y,Z,zorder=0,cmap=cmap,norm=norm)
+pm.plot().colorbar(cf)
 # cs =map.contour(X,Y,Z,levels, colors="k")#,colors="k",zorder=3,linewidths=0.5)
 
 # #incresing from 10 t0a
