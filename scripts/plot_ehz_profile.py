@@ -1,3 +1,10 @@
+'''
+    Routine for plotting MagGrid objects using matplotlib
+    Use --help for more info and see Jupyter notebook(s) ./notebooks
+    For usage examples.
+    Outputs a timestamped png file
+'''
+
 import sys
 import os
 import numpy as np
@@ -88,48 +95,11 @@ def main():
     map.drawparallels(parallel_interval,labels=[1,0,0,0],
     dashes=[90,8], linewidth=0.0)
 
-    # # #zorder puts it at lowest plot level
-    # map.fillcontinents(color='0.95',zorder=1)
-    # header=""
-    # if type=="detection":
-    #     header="Minimum Magnitude Detection"
-    # elif type=="gap":
-    #     header="Largest Azimuthal Gap"
-    # else:
-    #     header="Distance to closest station"
     #
     pm.plot().title(
         "{}\n{}\n {} station detection {} deg. grid".format(
         plot_title, plot_desc, mapGrid.num_detections, mapGrid.resolution))
-    # # #should we add no solution symbol to legend?
-    # # no_solution=False
-    # #iterate through sets and assign color
-    #
-    # # for key in mapGrid.scnl_collections():
-    # #   #plot station data
-    # #   lats, lons, sols=mapGrid.get_xyz_lists(key)
-    # #   #find index of list where stations did not contrib to any solution (looosers)
-    # #   no_i=mapGrid.get_no_solution_index(key)
-    # #
-    # #
-    # #   if no_i < len(lons)-1:
-    # #       no_solution=True
-    # #   #contributed to solution
-    # #   Sx,Sy=map(lons[:no_i], lats[:no_i])
-    # #   #did not contrib to solution
-    # #   Sxn,Syn=map(lons[no_i:], lats[no_i:])
-    # #
-    # #   color,label=pm.plot_color_label(key)
-    # #   stas=pm.plot().scatter(Sx, Sy, s=70, marker='^', c=color, label=label,zorder=11)
-    # #   #plot no solutions but don't create a legend entry for each
-    # #   pm.plot().scatter(Sxn, Syn, s=30, marker='o', facecolors='none', edgecolors=color,zorder=11)
-    #
-    # # #create legend for no solutions
-    # # if no_solution:
-    # #   pm.plot().scatter([-1],[-1], s=30, marker='o',facecolors='none',edgecolor='k',label="No solution")
-    # #bbox coords= x,y,width,height
-    # # bbox=(0.0,-0.2)
-    # # pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,scatterpoints=1)
+
 
     fig_name=pm.outfile_with_stamp('./plots/')
     pm.plot().savefig(fig_name)
@@ -137,3 +107,38 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+'''FIXME: This logic was removed but should be put back in at sometime
+    It involves plotting the station data, which are now serialized with
+    the MapGrid object as the scnl attr
+'''
+
+# # #should we add no solution symbol to legend?
+# # no_solution=False
+# #iterate through sets and assign color
+#
+# # for key in mapGrid.scnl_collections():
+# #   #plot station data
+# #   lats, lons, sols=mapGrid.get_xyz_lists(key)
+# #   #find index of list where stations did not contrib to any solution (looosers)
+# #   no_i=mapGrid.get_no_solution_index(key)
+# #
+# #
+# #   if no_i < len(lons)-1:
+# #       no_solution=True
+# #   #contributed to solution
+# #   Sx,Sy=map(lons[:no_i], lats[:no_i])
+# #   #did not contrib to solution
+# #   Sxn,Syn=map(lons[no_i:], lats[no_i:])
+# #
+# #   color,label=pm.plot_color_label(key)
+# #   stas=pm.plot().scatter(Sx, Sy, s=70, marker='^', c=color, label=label,zorder=11)
+# #   #plot no solutions but don't create a legend entry for each
+# #   pm.plot().scatter(Sxn, Syn, s=30, marker='o', facecolors='none', edgecolors=color,zorder=11)
+#
+# # #create legend for no solutions
+# # if no_solution:
+# #   pm.plot().scatter([-1],[-1], s=30, marker='o',facecolors='none',edgecolor='k',label="No solution")
+# #bbox coords= x,y,width,height
+# # bbox=(0.0,-0.2)
+# # pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,scatterpoints=1)

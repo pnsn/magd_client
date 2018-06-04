@@ -1,3 +1,6 @@
+'''
+    Create MapGrid(s). Requries config file as input. See ./config for options
+'''
 import sys
 import os
 import re
@@ -5,7 +8,7 @@ from magD.magD import MagD
 from magD.mapGrid import MapGrid
 import configparser
 if len(sys.argv)<2:
-    print("provide config path as first arg and map output type for second arg")
+    print("provide config path as first arg ")
     print("Example: python scripts/ehz_profile.py config/ehz_profile/ehz_and_bb.ini")
     exit(1)
 config_path =sys.argv[1]
