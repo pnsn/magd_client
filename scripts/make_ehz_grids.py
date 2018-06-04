@@ -2,7 +2,7 @@ import sys
 import os
 import re
 from magD.magD import MagD
-from magD.map_grid import MapGrid
+from magD.mapGrid import MapGrid
 import configparser
 if len(sys.argv)<2:
     print("provide config path as first arg and map output type for second arg")
@@ -21,5 +21,5 @@ for key in conf.sections():
     if re.match(r'noise', key):
         data_srcs[key]=conf[key]
 magD=MagD(grids, data_srcs)
-out=magD.build_grids()
-print(out)
+magD.build_grids()
+# print(out)
