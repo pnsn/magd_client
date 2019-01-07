@@ -62,21 +62,36 @@ Run Example:
 This step can be skipped if you provide the above formatted csv
 
 ##Make MapGrid objects
-This is the CPU intensive step. This process has the following steps:
+This is the CPU intensive step
+###Types of mapGrids:
+ * **detection**: detection Grid, uses largest magnitude of n stations)
+ * **gap**: largest azimuthal gap of n stations
+ * **Distance** grids (only considers the n stations)
+   * **dist_min**: closest station
+   * **dist_med**: median station
+   * **dist_ave**: average station
+   * **dist_max**: furthest station
 
+###Process  
 * Process above csv
-* Get noise PDF for IRIS Mustang
-* Save all PDFs locally with pickle
-* Step through all points on map and evaluate every PDF, sort by magnitude asc
+* Step through all points (origins) on map and evaluate:
+* If profiling by noise:
+    * Get noise PDF from pickle (if exists) or IRIS Mustang
+    * Save all PDFs locally with pickle
+    * For each origin
+        * Evaluate each station's PDF to find lowest detectable mag.
+        * Sort all solutions by mag (low to high) from each origin
+        * Consider only [0:num_solutions] of sorted list
+            * Lowest detection is last solution
+            * Azimuthal gap is largest gap of new list
+            * Distance stat only considers new list
+* If profiling only spatially:
+    * For each origin
+        * Sort all stations by distance from each origin
+        * Consider only [0:num_solutions] of sorted list
+            * Azimuthal gap is largest gap of new list
+            * Distance stat only considers new list
 
-Based on the above find the n stations (num_detections) with the lowest magnitude and produces the following mapGrids:
-  * **detection**: detection Grid, uses largest magnitude of n stations)
-  * **gap**: largest azimuthal gap of n stations
-  * Distance grids (only considers the n stations)
-    * **dist_min**: closest station
-    * **dist_med**: median station
-    * **dist_ave**: average station
-    * **dist_max**: furthest station
 
   ##Create aggregate MapGrids if needed.
   Once MapGrids are saved, you can aggregate and save as needed. See notebooks for real examples. If you would like to diff two detection grids

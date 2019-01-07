@@ -10,6 +10,7 @@ import os
 import numpy as np
 import math
 import argparse
+from argparse import RawTextHelpFormatter
 
 from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
@@ -19,23 +20,19 @@ from magD.plotMagD import PlotMagD
 #file path to pickled grid
 #inputs should by min max vals (default scale data)
 def main():
-    parser = argparse.ArgumentParser(description="A routine to plot")
+    parser = argparse.ArgumentParser(description="A routine to plot",
+        formatter_class=RawTextHelpFormatter)
     parser.add_argument('-p','--path',
         help='Path to pickled magGrid file', required=True)
     parser.add_argument('-i','--plot_min', help="min plot value")
     parser.add_argument('-a','--plot_max', help="max plot value")
-    parser.add_argument('-t','--title', help="title of plot")
-    parser.add_argument('-d','--description', help="Description of plot (2nd line)")
+    parser.add_argument('-t1','--title1', help="title1 of plot", default="Why didn't you add a title?")
+    parser.add_argument('-t2','--title2', help="title2 of plot")
+    parser.add_argument('-t3','--title3', help="title3 of plot")
     parser.add_argument('-c', '--color', help="Matplotlib Color Pallette", default="Blues")
-
+    parser.add_argument('-n', '--nbins', help="Number of contour bins", default=10)
     args = parser.parse_args()## show values ##
     mapGrid=get_pickle(args.path)
-    plot_title = args.title
-    if not plot_title:
-        plot_title = mapGrid.type
-    plot_desc = args.description
-    if not plot_desc:
-        plot_desc = mapGrid.name
     pm=PlotMagD(mapGrid)
 
 
@@ -56,7 +53,8 @@ def main():
     #r=[math.log(distance)/math.log(max) for distance in row]
 
     #r=[gap/max for gap in row]
-    Z=mapGrid.matrix
+    Z = np.clip(mapGrid.matrix, float(args.plot_min), float(args.plot_max))
+    # Z= mapGrid.matrix
     X=np.array(X) + 0.5/2.
     Y=np.array(Y) + 0.5/2.
     if not args.plot_min:
@@ -68,7 +66,8 @@ def main():
     else:
         plot_max=float(args.plot_max)
 
-    levels = MaxNLocator(nbins=10).tick_values(plot_min, plot_max)
+    levels = MaxNLocator(nbins=args.nbins).tick_values(plot_min, plot_max)
+
     cmap = pm.plot().get_cmap(args.color)
     norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 
@@ -94,12 +93,11 @@ def main():
     parallel_interval=pm.parallel_interval(mapGrid.lat_min, mapGrid.lat_max)
     map.drawparallels(parallel_interval,labels=[1,0,0,0],
     dashes=[90,8], linewidth=0.0)
+    title_arr = [args.title1, args.title2, args.title3]
+    title_arr = [x for x in title_arr if x != None]
+    title = "\n".join(title_arr)
 
-    #
-    pm.plot().title(
-        "{}\n{}\n {} station detection {} deg. grid".format(
-        plot_title, plot_desc, mapGrid.num_solutions, mapGrid.resolution))
-
+    pm.plot().title(title)
 
     fig_name=pm.outfile_with_stamp('./plots/')
     pm.plot().savefig(fig_name)
@@ -107,38 +105,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-'''FIXME: This logic was removed but should be put back in at sometime
-    It involves plotting the station data, which are now serialized with
-    the MapGrid object as the scnl attr
-'''
-
-# # #should we add no solution symbol to legend?
-# # no_solution=False
-# #iterate through sets and assign color
-#
-# # for key in mapGrid.scnl_collections():
-# #   #plot station data
-# #   lats, lons, sols=mapGrid.get_xyz_lists(key)
-# #   #find index of list where stations did not contrib to any solution (looosers)
-# #   no_i=mapGrid.get_no_solution_index(key)
-# #
-# #
-# #   if no_i < len(lons)-1:
-# #       no_solution=True
-# #   #contributed to solution
-# #   Sx,Sy=map(lons[:no_i], lats[:no_i])
-# #   #did not contrib to solution
-# #   Sxn,Syn=map(lons[no_i:], lats[no_i:])
-# #
-# #   color,label=pm.plot_color_label(key)
-# #   stas=pm.plot().scatter(Sx, Sy, s=70, marker='^', c=color, label=label,zorder=11)
-# #   #plot no solutions but don't create a legend entry for each
-# #   pm.plot().scatter(Sxn, Syn, s=30, marker='o', facecolors='none', edgecolors=color,zorder=11)
-#
-# # #create legend for no solutions
-# # if no_solution:
-# #   pm.plot().scatter([-1],[-1], s=30, marker='o',facecolors='none',edgecolor='k',label="No solution")
-# #bbox coords= x,y,width,height
-# # bbox=(0.0,-0.2)
-# # pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,scatterpoints=1)
