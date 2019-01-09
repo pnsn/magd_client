@@ -31,6 +31,12 @@ def main():
     parser.add_argument('-t3','--title3', help="title3 of plot")
     parser.add_argument('-c', '--color', help="Matplotlib Color Pallette", default="Blues")
     parser.add_argument('-n', '--nbins', help="Number of contour bins", default=10)
+    parser.add_argument('-d', '--depth', help='Focal Depth', default=0)
+    parser.add_argument('-vp', '--velocity_p', help='velocity of P', default=None)
+    parser.add_argument('-vs', '--velocity_s', help='Velocity of S', default=None)
+    parser.add_argument('-l', '--levels',
+        help='Contour levels, use instead of plot_min, plot_max, and nbins',
+        default=None)
     args = parser.parse_args()## show values ##
     mapGrid=get_pickle(args.path)
     pm=PlotMagD(mapGrid)
@@ -47,44 +53,48 @@ def main():
 
 
 
-    # levels=pm.create_contour_levels(detect_vector, 2)
     X,Y=pm.project_x_y(map)
 
-    #r=[math.log(distance)/math.log(max) for distance in row]
+    #dirty way to check for blindzone
+    #scale matrix in place
+    if float(args.depth) > 0.0 and args.velocity_p is not None and args.velocity_s is not None:
+        m = mapGrid.matrix
+        for r in range(len(m)):
+            for c in range(len(m[r])):
+                m[r][c]=pm.calc_blindzone(m[r][c],
+                    float(args.velocity_p), float(args.velocity_s), float(args.depth))
 
-    #r=[gap/max for gap in row]
-    Z = np.clip(mapGrid.matrix, float(args.plot_min), float(args.plot_max))
-    # Z= mapGrid.matrix
+
+    if args.levels is not None:
+        levels = args.levels.split(',')
+        levels = [float(x) for x in levels]
+        levels = np.array(levels)
+        plot_min=np.min(levels)
+        plot_max=np.max(levels)
+
+    else:
+        plot_min = float(args.plot_min)
+        plot_max = float(args.plot_max)
+        levels = MaxNLocator(nbins=args.nbins).tick_values(plot_min, plot_max)
+    #Z = np.clip(mapGrid.matrix, plot_min, plot_max)
+    Z= mapGrid.matrix
     X=np.array(X) + 0.5/2.
     Y=np.array(Y) + 0.5/2.
-    if not args.plot_min:
-        plot_min = np.min(Z)
-    else:
-        plot_min=float(args.plot_min)
-    if not args.plot_max:
-        plot_max = np.max(Z)
-    else:
-        plot_max=float(args.plot_max)
 
-    levels = MaxNLocator(nbins=args.nbins).tick_values(plot_min, plot_max)
 
     cmap = pm.plot().get_cmap(args.color)
-    norm = BoundaryNorm(levels, ncolors=cmap.N, clip=True)
 
-    # if pm.type=="detection":
-        # cm=pm.plot().pcolormesh(X,Y,Z,zorder=0, vmin=pm.mag_min, vmax=pm.mag_max)
-    # else:
+    # norm = BoundaryNorm(levels, ncolors=cmap.N, clip=False)
+
+    # cmap.set_over('b')
+    cmap.set_bad('red')
 
     cf = pm.plot().contourf(X, Y, Z, levels=levels, cmap=cmap,
             vmim=plot_min, vmax=plot_max)
 
 
-        # cm=pm.plot().pcolormesh(X,Y,Z,zorder=0,cmap=cmap,norm=norm)
-    pm.plot().colorbar(cf)
-    # cs =map.contour(X,Y,Z,levels, colors="k")#,colors="k",zorder=3,linewidths=0.5)
 
-    # #incresing from 10 t0a
-    # pm.plot().clabel(cs, inline=1, fontsize=12,fmt='%1.1f')
+    pm.plot().colorbar(cf)
 
     meridian_interval=pm.meridian_interval(mapGrid.lon_min, mapGrid.lon_max)
     # #set linewidth to 0  to get only labels
@@ -98,6 +108,7 @@ def main():
     title = "\n".join(title_arr)
 
     pm.plot().title(title)
+
 
     fig_name=pm.outfile_with_stamp('./plots/')
     pm.plot().savefig(fig_name)
