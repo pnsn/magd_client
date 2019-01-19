@@ -3,6 +3,7 @@
     Use --help for more info and see Jupyter notebook(s) ./notebooks
     For usage examples.
     Outputs a timestamped png file
+    # pip install -e matplotlib-scalebar
 '''
 
 import sys
@@ -16,6 +17,7 @@ from matplotlib.colors import BoundaryNorm
 from matplotlib.ticker import MaxNLocator
 from magD.pickle import *
 from magD.plotMagD import PlotMagD
+
 
 #file path to pickled grid
 #inputs should by min max vals (default scale data)
@@ -37,12 +39,15 @@ def main():
     parser.add_argument('-l', '--levels',
         help='Contour levels, use instead of plot_min, plot_max, and nbins',
         default=None)
+    parser.add_argument('-pw', '--plotwidth', help='Plot width in inches', default=10)
+    parser.add_argument('-ph', '--plotheight', help='Plot height in inches', default=12)
+    parser.add_argument('-ps', '--plotstas', help='Plot Stations', default=False)
     args = parser.parse_args()## show values ##
     mapGrid=get_pickle(args.path)
     pm=PlotMagD(mapGrid)
 
 
-    fig=pm.plot().figure(figsize=(10,12))
+    fig=pm.plot().figure(figsize=(int(args.plotwidth), int(args.plotheight)))
     pm.plot().rc("font", size=14)
 
     bounds=(mapGrid.lat_min, mapGrid.lat_max, mapGrid.lon_min, mapGrid.lon_max)
@@ -52,18 +57,7 @@ def main():
     map.drawcountries(zorder=2)
 
 
-
     X,Y=pm.project_x_y(map)
-
-    #dirty way to check for blindzone
-    #scale matrix in place
-    if float(args.depth) > 0.0 and args.velocity_p is not None and args.velocity_s is not None:
-        m = mapGrid.matrix
-        for r in range(len(m)):
-            for c in range(len(m[r])):
-                m[r][c]=pm.calc_blindzone(m[r][c],
-                    float(args.velocity_p), float(args.velocity_s), float(args.depth))
-
 
     if args.levels is not None:
         levels = args.levels.split(',')
@@ -81,25 +75,33 @@ def main():
     X=np.array(X) + 0.5/2.
     Y=np.array(Y) + 0.5/2.
 
-
     cmap = pm.plot().get_cmap(args.color)
 
     # norm = BoundaryNorm(levels, ncolors=cmap.N, clip=False)
 
-    # cmap.set_over('b')
-    cmap.set_bad('red')
 
     cf = pm.plot().contourf(X, Y, Z, levels=levels, cmap=cmap,
             vmim=plot_min, vmax=plot_max)
 
-
-
-    pm.plot().colorbar(cf)
+    if args.plotstas:
+        for key in mapGrid.scnls:
+          lats = [scnl.lat for scnl in mapGrid.scnls[key]]
+          lons = [scnl.lon for scnl in mapGrid.scnls[key]]
+          #find index of list where stations did not contrib to any solution (looosers)
+          Sx,Sy=map(lons, lats)
+          color= mapGrid.scnls[key][0].color
+          symbol= mapGrid.scnls[key][0].symbol
+          stas=pm.plot().scatter(Sx, Sy, s=70, marker=symbol, c=color, label="station",zorder=11)
+        pm.plot().colorbar(cf,fraction=0.040, pad=0.04)
 
     meridian_interval=pm.meridian_interval(mapGrid.lon_min, mapGrid.lon_max)
     # #set linewidth to 0  to get only labels
     map.drawmeridians(meridian_interval,labels=[0,0,0,1],
     dashes=[90,8], linewidth=0.0)
+    # map.drawmapscale(lon=-120.0, lat= 45.0, lon0=-120.0, lat0=45.0, length=50,
+    #     barstyle='simple', fontsize = 14, units='km', yoffset=1,
+    #     labelstyle='simple', fontcolor='k', fillcolor1='w',
+    #     fillcolor2='k', ax=1, format='%d', zorder=1 )
     parallel_interval=pm.parallel_interval(mapGrid.lat_min, mapGrid.lat_max)
     map.drawparallels(parallel_interval,labels=[1,0,0,0],
     dashes=[90,8], linewidth=0.0)
@@ -108,6 +110,12 @@ def main():
     title = "\n".join(title_arr)
 
     pm.plot().title(title)
+
+
+
+
+    # map.drawmapscale(x, y, x, y, 40 , barstyle='fancy')
+
 
 
     fig_name=pm.outfile_with_stamp('./plots/')

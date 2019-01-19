@@ -71,6 +71,10 @@ This is the CPU intensive step
    * **dist_med**: median station
    * **dist_ave**: average station
    * **dist_max**: furthest station
+   * **blindzone**: radius of blindzone
+* **time**:
+    * **trigger_time**: Time to trigger once n station reports
+    * **warning_time**: p arrival - trigger_time
 
 ###Process  
 * Process above csv
@@ -117,7 +121,27 @@ This is the CPU intensive step
 ##Plot MapGrids
 Use PlotMapD class to plot MapGrids
 
-The script scripts/plot_ehz_profile.py gives plot examples.
+The script scripts/plot_heatmap.py gives plot examples.
+
+To create time use distance matrix and PlotMagD functions to transform matrix
+* blindzone: calc_blindzone(self, epi_distance, velocity_p, velocity_s, depth)
+  * epi_distance, float, km
+  * velocity_p, float, km/s
+  * velocity_s, float, km/s
+  * depth, float, km
+
+* trigger_time(self,epi_distance, velocity_p, depth, processing_time)
+  * epi_distance, float, km
+  * velocity_p, float, km/s
+  * depth, float, km
+  * processing_time, float, seconds
+
+* warning_time(self,epi_distance, velocity_p, velocity_s, depth, processing_time)
+  * epi_distance, float, km
+  * velocity_p, float, km/s
+  * velocity_s, float, km/s
+  * depth, float, km
+  * processing_time, float, seconds
 
 PlotMagD uses matplotlib but you can use any plotting library you please.
 
