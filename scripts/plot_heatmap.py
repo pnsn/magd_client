@@ -91,7 +91,9 @@ def main():
           Sx,Sy=map(lons, lats)
           color= mapGrid.scnls[key][0].color
           symbol= mapGrid.scnls[key][0].symbol
-          stas=pm.plot().scatter(Sx, Sy, s=70, marker=symbol, c=color, label="station",zorder=11)
+          label= mapGrid.scnls[key][0].label
+          stas=pm.plot().scatter(Sx, Sy, s=30, marker=symbol, c=color,
+            label=label, zorder=11)
         pm.plot().colorbar(cf,fraction=0.040, pad=0.04)
 
     meridian_interval=pm.meridian_interval(mapGrid.lon_min, mapGrid.lon_max)
@@ -110,6 +112,9 @@ def main():
     title = "\n".join(title_arr)
 
     pm.plot().title(title)
+
+    bbox=(0.0,-0.2)
+    pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,scatterpoints=1)
 
 
 
