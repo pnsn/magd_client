@@ -24,7 +24,7 @@ data_srcs={}
 for key in data_conf.sections():
     data_srcs[key]=data_conf[key]
 magD=MagD(grids, data_srcs)
-magD.read_stations()
+magD.read_destinations()
 magD.make_origins()
 grids = magD.build_grids()
 print("Created the following grids:")

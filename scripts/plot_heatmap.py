@@ -84,17 +84,17 @@ def main():
             vmim=plot_min, vmax=plot_max)
 
     if args.plotstas:
-        for key in mapGrid.scnls:
-          lats = [scnl.lat for scnl in mapGrid.scnls[key]]
-          lons = [scnl.lon for scnl in mapGrid.scnls[key]]
-          #find index of list where stations did not contrib to any solution (looosers)
-          Sx,Sy=map(lons, lats)
-          color= mapGrid.scnls[key][0].color
-          symbol= mapGrid.scnls[key][0].symbol
-          label= mapGrid.scnls[key][0].label
-          stas=pm.plot().scatter(Sx, Sy, s=30, marker=symbol, c=color,
+        for key in mapGrid.destinations:
+            lats = [dest.lat for dest in mapGrid.destinations[key]]
+            lons = [dest.lon for dest in mapGrid.destinations[key]]
+            #find index of list where stations did not contrib to any solution (looosers)
+            Sx,Sy=map(lons, lats)
+            color= mapGrid.destinations[key][0].color
+            symbol= mapGrid.destinations[key][0].symbol
+            label= mapGrid.destinations[key][0].label
+            stas=pm.plot().scatter(Sx, Sy, s=30, marker=symbol, c=color,
             label=label, zorder=11)
-        pm.plot().colorbar(cf,fraction=0.040, pad=0.04)
+        pm.plot().colorbar(cf,fraction=0.030, pad=0.04)
 
     meridian_interval=pm.meridian_interval(mapGrid.lon_min, mapGrid.lon_max)
     # #set linewidth to 0  to get only labels
