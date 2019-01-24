@@ -84,16 +84,17 @@ def main():
             vmim=plot_min, vmax=plot_max)
 
     if args.plotstas:
-        for key in mapGrid.destinations:
-            lats = [dest.lat for dest in mapGrid.destinations[key]]
-            lons = [dest.lon for dest in mapGrid.destinations[key]]
+        for key in mapGrid.markers:
+            lats = [dest.lat for dest in mapGrid.markers[key]]
+            lons = [dest.lon for dest in mapGrid.markers[key]]
             #find index of list where stations did not contrib to any solution (looosers)
             Sx,Sy=map(lons, lats)
-            color= mapGrid.destinations[key][0].color
-            symbol= mapGrid.destinations[key][0].symbol
-            label= mapGrid.destinations[key][0].label
-            stas=pm.plot().scatter(Sx, Sy, s=30, marker=symbol, c=color,
-            label=label, zorder=11)
+            color= mapGrid.markers[key][0].color
+            symbol= mapGrid.markers[key][0].symbol
+            label= mapGrid.markers[key][0].label
+            size = int(mapGrid.markers[key][0].size)
+            stas=pm.plot().scatter(Sx, Sy, s=size, marker=symbol, c=color,
+                label=label, zorder=11)
         pm.plot().colorbar(cf,fraction=0.030, pad=0.04)
 
     meridian_interval=pm.meridian_interval(mapGrid.lon_min, mapGrid.lon_max)
