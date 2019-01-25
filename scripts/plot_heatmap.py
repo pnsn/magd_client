@@ -56,7 +56,6 @@ def main():
     map.drawstates(zorder=2)
     map.drawcountries(zorder=2)
 
-
     X,Y=pm.project_x_y(map)
 
     if args.levels is not None:
@@ -78,10 +77,9 @@ def main():
     cmap = pm.plot().get_cmap(args.color)
 
     # norm = BoundaryNorm(levels, ncolors=cmap.N, clip=False)
-
-
     cf = pm.plot().contourf(X, Y, Z, levels=levels, cmap=cmap,
             vmim=plot_min, vmax=plot_max)
+
 
     if args.plotstas:
         for key in mapGrid.markers:
@@ -93,10 +91,14 @@ def main():
             symbol= mapGrid.markers[key][0].symbol
             label= mapGrid.markers[key][0].label
             size = int(mapGrid.markers[key][0].size)
-            stas=pm.plot().scatter(Sx, Sy, s=size, marker=symbol, c=color,
+            pm.plot().scatter(Sx, Sy, s=size, marker=symbol, c=color,
                 label=label, zorder=11)
-        pm.plot().colorbar(cf,fraction=0.030, pad=0.04)
-
+    solutions = mapGrid.firstn_solutions
+    s_lats=[s.obj.lat for s in solutions]
+    s_lons=[s.obj.lon for s in solutions]
+    Sx,Sy=map(s_lons, s_lats)
+    pm.plot().scatter(Sx, Sy, s=30, marker='D', c="black", label="Solution", zorder=12)
+    pm.plot().colorbar(cf,fraction=0.030, pad=0.04)
     meridian_interval=pm.meridian_interval(mapGrid.lon_min, mapGrid.lon_max)
     # #set linewidth to 0  to get only labels
     map.drawmeridians(meridian_interval,labels=[0,0,0,1],
@@ -111,7 +113,6 @@ def main():
     title_arr = [args.title1, args.title2, args.title3]
     title_arr = [x for x in title_arr if x != None]
     title = "\n".join(title_arr)
-
     pm.plot().title(title)
 
     bbox=(0.0,-0.2)
