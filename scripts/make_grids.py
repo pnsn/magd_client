@@ -39,6 +39,7 @@ data_conf= configparser.ConfigParser()
 data_conf.read(config_path)
 grid_types = args.grid_types.split(',')
 #create array and intatiate grid objecs
+#for use in jupyter notebook
 grids=[]
 for type in grid_types:
     mapgrid = MapGrid(type, args.name, float(args.resolution), float(args.lat_min),
@@ -53,6 +54,20 @@ magD=MagD(grids, data_srcs)
 magD.read_markers()
 magD.make_origins()
 grids = magD.build_grids()
-print("Created the following grids:")
+'''
+    create a dictionary of grid paths keyed first on grid name then grid type:
+    grid_paths = {
+        'eew_washington':{
+                            'dist_max': "/path/to/dist_max/pickle",
+                            'detection': "/path/to/dectection/pickle"
+
+                            }
+    }
+    This exposes the variable to jupyter notebook for plotting grid so name should
+    be unique for notebook scope
+'''
+_grid_paths ={}
 for grid in grids:
+    _grid_paths[grid.type]= grid.get_path()
+    print("Path for " + grid.type + ":")
     print(grid.get_path())
