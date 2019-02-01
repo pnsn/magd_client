@@ -5,7 +5,7 @@ https://github.com/pnsn/magD
 
 To run locally, clone MagD, then
 
-pip install .
+pip3 install .
 
 # MagD plot steps
 See notebooks/* for real examples
