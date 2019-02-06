@@ -5,11 +5,11 @@ https://github.com/pnsn/magD
 
 To run locally, clone MagD, then
 
-pip install .
+pip3 install .
 
-#MagD plot steps
+# MagD plot steps
 See notebooks/* for real examples
-##Create initial csv of SCNLs you want to profile
+## Create initial csv of SCNLs you want to profile
 To request station data from fdsn the following csv format is needed:
 * sta,
 * seedchan,
@@ -61,9 +61,9 @@ Run Example:
 
 This step can be skipped if you provide the above formatted csv
 
-##Make MapGrid objects
+## Make MapGrid objects
 This is the CPU intensive step
-###Types of mapGrids:
+### Types of mapGrids:
  * **detection**: detection Grid, uses largest magnitude of n stations)
  * **gap**: largest azimuthal gap of n stations
  * **Distance** grids (only considers the n stations)
@@ -76,7 +76,7 @@ This is the CPU intensive step
     * **trigger_time**: Time to trigger once n station reports
     * **warning_time**: p arrival - trigger_time
 
-###Process  
+### Process  
 * Process above csv
 * Step through all points (origins) on map and evaluate:
 * If profiling by noise:
@@ -97,7 +97,7 @@ This is the CPU intensive step
             * Distance stat only considers new list
 
 
-  ##Create aggregate MapGrids if needed.
+  ## Create aggregate MapGrids if needed.
   Once MapGrids are saved, you can aggregate and save as needed. See notebooks for real examples. If you would like to diff two detection grids
 
   Instantiate both:
@@ -118,7 +118,7 @@ This is the CPU intensive step
 
   `diff_grid.save()`
 
-##Plot MapGrids
+## Plot MapGrids
 Use PlotMapD class to plot MapGrids
 
 The script scripts/plot_heatmap.py gives plot examples.
