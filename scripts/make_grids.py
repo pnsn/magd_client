@@ -12,7 +12,6 @@ import configparser
 # 2) 47˚, -124˚, 55 km  aberdeen
 # 3) 48.5˚, -121˚, 10 km buckner
 
-
 parser = argparse.ArgumentParser(description="A routine to make mapgrids")
 parser.add_argument('-n','--name', help='unique name of magD run', required=True)
 parser.add_argument('-g','--grid_types', help="type of grid", required=True)
@@ -31,7 +30,6 @@ parser.add_argument('-q', '--qconst', help="q", default=0)
 parser.add_argument('-b', '--beta', help='beta', default=0)
 
 args = parser.parse_args()## show values ##
-
 root_path = os.path.dirname(os.path.realpath(__file__))
 config_path = root_path + "/../config/" + args.name +".ini"
 pickle_path = root_path + "/../pickle_jar"
@@ -70,4 +68,4 @@ _grid_paths ={}
 for grid in grids:
     _grid_paths[grid.type]= grid.get_path()
     print("Path for " + grid.type + ":")
-    print(grid.get_path())
+    print("  " + grid.get_path())

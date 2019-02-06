@@ -70,10 +70,10 @@ def main():
         plot_max = float(args.plot_max)
         levels = MaxNLocator(nbins=args.nbins).tick_values(plot_min, plot_max)
     #Z = np.clip(mapGrid.matrix, plot_min, plot_max)
+
     Z= mapGrid.matrix
     X=np.array(X) + 0.5/2.
     Y=np.array(Y) + 0.5/2.
-
     cmap = pm.plot().get_cmap(args.color)
 
     # norm = BoundaryNorm(levels, ncolors=cmap.N, clip=False)

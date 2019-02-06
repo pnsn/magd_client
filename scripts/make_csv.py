@@ -1,5 +1,5 @@
 import csv
-import iris
+import magD.iris as iris
 import argparse
 
 
