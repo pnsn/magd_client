@@ -79,6 +79,7 @@ def main():
     # norm = BoundaryNorm(levels, ncolors=cmap.N, clip=False)
     cf = pm.plot().contourf(X, Y, Z, levels=levels, cmap=cmap,
                             vmim=plot_min, vmax=plot_max)
+    solutions = mapGrid.firstn_solutions
 
     if args.plotstas:
         for key in mapGrid.markers:
@@ -93,15 +94,16 @@ def main():
             size = int(mapGrid.markers[key]['size'])
             pm.plot().scatter(Sx, Sy, s=size, marker=symbol, c=color,
                               label=label, zorder=11)
-            solutions = mapGrid.firstn_solutions
-            # s_lats = [s.obj.lat for s in solutions]
-            # s_lons = [s.obj.lon for s in solutions]
-            # Sx, Sy = map(s_lons, s_lats)
-            # pm.plot().scatter(Sx, Sy, s=30, marker='D', c="black",
-            #                   label="Solution", zorder=12)
             bbox = (0.0, -0.2)
             pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,
                              scatterpoints=1)
+    if solutions is not None:
+        s_lats = [s.obj.lat for s in solutions]
+        s_lons = [s.obj.lon for s in solutions]
+        Sx, Sy = map(s_lons, s_lats)
+        pm.plot().scatter(Sx, Sy, s=30, marker='D', c="black",
+                          label="Solution", zorder=12)
+
     pm.plot().colorbar(cf, fraction=0.030, pad=0.04)
     meridian_interval = pm.meridian_interval(mapGrid.lon_min, mapGrid.lon_max)
     # #set linewidth to 0  to get only labels
