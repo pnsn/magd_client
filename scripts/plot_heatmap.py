@@ -124,8 +124,8 @@ def main():
 
     # map.drawmapscale(x, y, x, y, 40 , barstyle='fancy')
 
-    fig_name = pm.outfile_with_stamp('./plots/')
-    pm.plot().savefig(fig_name)
+    # fig_name = pm.outfile_with_stamp('./plots/')
+    # pm.plot().savefig(fig_name)
     pm.plot().show()
 
 if __name__ == "__main__":
