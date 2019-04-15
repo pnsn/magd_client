@@ -2,7 +2,6 @@
     Create MapGrid(s). Requries config file as input. See ./config for options
 '''
 import os
-from magD.magD import MagD
 from magD.mapGrid import MapGrid
 import argparse
 import configparser
@@ -14,7 +13,7 @@ import configparser
 parser = argparse.ArgumentParser(description="A routine to make mapgrids")
 parser.add_argument('-n', '--name', help='unique name of magD run',
                     required=True)
-parser.add_argument('-g', '--grid_types', help="type of grid", required=True)
+parser.add_argument('-g', '--grid_type', help="type of grid", required=True)
 parser.add_argument('-an', '--lat_min', help="min lat", required=True)
 parser.add_argument('-ax', '--lat_max', help="max lat", required=True)
 parser.add_argument('-on', '--lon_min', help="min lon", required=True)
@@ -35,39 +34,25 @@ config_path = root_path + "/../config/" + args.name + ".ini"
 pickle_path = root_path + "/../pickle_jar"
 data_conf = configparser.ConfigParser()
 data_conf.read(config_path)
-grid_types = args.grid_types.split(',')
+grid_type = args.grid_type
 # create array and intatiate grid objecs
 # for use in jupyter notebook
-grids = []
-for type in grid_types:
-    mapgrid = MapGrid(type, args.name, float(args.resolution),
-                      float(args.lat_min), float(args.lat_max),
-                      float(args.lon_min), float(args.lon_max),
-                      int(args.num_solutions), float(args.nyquist_correction),
-                      float(args.mu), float(args.qconst), float(args.beta),
-                      pickle_path)
-    grids.append(mapgrid)
+grid = MapGrid(grid_type, args.name, float(args.resolution),
+               float(args.lat_min), float(args.lat_max),
+               float(args.lon_min), float(args.lon_max),
+               int(args.num_solutions), float(args.nyquist_correction),
+               float(args.mu), float(args.qconst), float(args.beta),
+               pickle_path)
 data_srcs = {}
 for key in data_conf.sections():
     data_srcs[key] = data_conf[key]
-magD = MagD(grids, data_srcs)
-magD.read_markers()
-magD.make_origins()
-grids = magD.build_grids()
+grid.build_markers(data_srcs)
+grid.build_origins()
+grid.build_matrix()
+grid.save()
 '''
-    create a dictionary of grid paths keyed first on grid name then grid type:
-    grid_paths = {
-        'eew_washington':{
-                            'dist_max': "/path/to/dist_max/pickle",
-                            'detection': "/path/to/dectection/pickle"
-
-                            }
-    }
-    This exposes the variable to jupyter notebook for plotting grid so name
-    should ßbe unique for notebook scope
+    expose __grid_path to interpreter (jupyter)
 '''
-_grid_paths = {}
-for grid in grids:
-    _grid_paths[grid.type] = grid.get_path()
-    print("Path for " + grid.type + ":")
-    print("  " + grid.get_path())
+_grid_path = grid.get_path()
+print("Path for " + grid.type + ":")
+print("  " + grid.get_path())
