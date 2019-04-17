@@ -20,7 +20,7 @@ with  infile as csvfile:
     reader=csv.reader(csvfile)
     for row in reader:
         if header:
-            writer.writerows([[ "sta","chan","net","loction","lat","lon","rate"]])
+            writer.writerows([[ "sta","chan","net","location","lat","lon","rate"]])
             header=False
         else:
             key = row[0] + row[2]

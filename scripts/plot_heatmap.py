@@ -43,14 +43,14 @@ def main():
     parser.add_argument('-ps', '--plotstas', help='Plot Stations',
                         default=False)
     args = parser.parse_args()
-    mapGrid = get_pickle(args.path)
-    pm = PlotMagD(mapGrid)
+    MagD = get_pickle(args.path)
+    pm = PlotMagD(MagD)
 
     pm.plot().figure(figsize=(int(args.plotwidth), int(args.plotheight)))
     # pm.plot().rc("font", size=14)
 
-    bounds = (mapGrid.lat_min, mapGrid.lat_max, mapGrid.lon_min,
-              mapGrid.lon_max)
+    bounds = (MagD.lat_min, MagD.lat_max, MagD.lon_min,
+              MagD.lon_max)
     map = pm.basemap(bounds)
     map.drawcoastlines(zorder=2)
     map.drawstates(zorder=2)
@@ -69,9 +69,9 @@ def main():
         plot_min = float(args.plot_min)
         plot_max = float(args.plot_max)
         levels = MaxNLocator(nbins=args.nbins).tick_values(plot_min, plot_max)
-    # Z = np.clip(mapGrid.matrix, plot_min, plot_max)
+    # Z = np.clip(MagD.matrix, plot_min, plot_max)
 
-    Z = mapGrid.matrix
+    Z = MagD.matrix
     X = np.array(X) + 0.5 / 2.
     Y = np.array(Y) + 0.5 / 2.
     cmap = pm.plot().get_cmap(args.color)
@@ -79,19 +79,19 @@ def main():
     # norm = BoundaryNorm(levels, ncolors=cmap.N, clip=False)
     cf = pm.plot().contourf(X, Y, Z, levels=levels, cmap=cmap,
                             vmim=plot_min, vmax=plot_max)
-    solutions = mapGrid.firstn_solutions
+    solutions = MagD.firstn_solutions
 
     if args.plotstas:
-        for key in mapGrid.markers:
-            lats = [dest.lat for dest in mapGrid.markers[key]['collection']]
-            lons = [dest.lon for dest in mapGrid.markers[key]['collection']]
+        for key in MagD.markers:
+            lats = [dest.lat for dest in MagD.markers[key]['collection']]
+            lons = [dest.lon for dest in MagD.markers[key]['collection']]
             # find index of list where stations did not contrib to any
             # solution (looosers)
             Sx, Sy = map(lons, lats)
-            color = mapGrid.markers[key]['color']
-            symbol = mapGrid.markers[key]['symbol']
-            label = mapGrid.markers[key]['label']
-            size = int(mapGrid.markers[key]['size'])
+            color = MagD.markers[key]['color']
+            symbol = MagD.markers[key]['symbol']
+            label = MagD.markers[key]['label']
+            size = int(MagD.markers[key]['size'])
             pm.plot().scatter(Sx, Sy, s=size, marker=symbol, c=color,
                               label=label, zorder=11)
             bbox = (0.0, -0.2)
@@ -105,7 +105,7 @@ def main():
                           label="Solution", zorder=12)
 
     pm.plot().colorbar(cf, fraction=0.030, pad=0.04)
-    meridian_interval = pm.meridian_interval(mapGrid.lon_min, mapGrid.lon_max)
+    meridian_interval = pm.meridian_interval(MagD.lon_min, MagD.lon_max)
     # #set linewidth to 0  to get only labels
     map.drawmeridians(meridian_interval, labels=[0, 0, 0, 1], dashes=[90, 8],
                       linewidth=0.0)
@@ -114,7 +114,7 @@ def main():
     #     barstyle='simple', fontsize = 14, units='km', yoffset=1,
     #     labelstyle='simple', fontcolor='k', fillcolor1='w',
     #     fillcolor2='k', ax=1, format='%d', zorder=1 )
-    parallel_interval = pm.parallel_interval(mapGrid.lat_min, mapGrid.lat_max)
+    parallel_interval = pm.parallel_interval(MagD.lat_min, MagD.lat_max)
     map.drawparallels(parallel_interval, labels=[1, 0, 0, 0], dashes=[90, 8],
                       linewidth=0.0)
     title_arr = [args.title1, args.title2, args.title3]
