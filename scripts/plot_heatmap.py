@@ -80,7 +80,7 @@ def main():
     cf = pm.plot().contourf(X, Y, Z, levels=levels, cmap=cmap,
                             vmim=plot_min, vmax=plot_max)
     solutions = MagD.firstn_solutions
-
+    unit = None
     if args.plotstas:
         for key in MagD.markers:
             lats = [dest.lat for dest in MagD.markers[key]['collection']]
@@ -92,23 +92,32 @@ def main():
             symbol = MagD.markers[key]['symbol']
             label = MagD.markers[key]['label']
             size = int(MagD.markers[key]['size'])
+            # print(MagD.markers[key])
+            # once set we don't want to unset units
+            if 'unit' in MagD.markers[key] and unit is None:
+                unit = MagD.markers[key]['unit']
             pm.plot().scatter(Sx, Sy, s=size, marker=symbol, c=color,
                               label=label, zorder=11)
             bbox = (0.0, -0.2)
             pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,
-                             scatterpoints=1)
+                             scatterpoints=1, fontsize=15)
     if solutions is not None:
         s_lats = [s.obj.lat for s in solutions]
         s_lons = [s.obj.lon for s in solutions]
         Sx, Sy = map(s_lons, s_lats)
-        pm.plot().scatter(Sx, Sy, s=30, marker='D', c="black",
+        pm.plot().scatter(Sx, Sy, s=50, marker='D', c="black",
                           label="Solution", zorder=12)
 
-    pm.plot().colorbar(cf, fraction=0.030, pad=0.04)
+    clb = pm.plot().colorbar(cf, fraction=0.030, pad=0.04)
+    # if unit is not None:
+    clb.ax.set_title(unit, fontsize=12)
+    clb.ax.set_yticklabels(clb.ax.get_yticklabels(), fontsize=12)
+
+
     meridian_interval = pm.meridian_interval(MagD.lon_min, MagD.lon_max)
     # #set linewidth to 0  to get only labels
     map.drawmeridians(meridian_interval, labels=[0, 0, 0, 1], dashes=[90, 8],
-                      linewidth=0.0)
+                      linewidth=0.0, fontsize=12)
     # map.drawmapscale(lon=-120.0, lat= 45.0, lon0=-120.0, lat0=45.0,
     #    length=50,
     #     barstyle='simple', fontsize = 14, units='km', yoffset=1,
@@ -116,11 +125,11 @@ def main():
     #     fillcolor2='k', ax=1, format='%d', zorder=1 )
     parallel_interval = pm.parallel_interval(MagD.lat_min, MagD.lat_max)
     map.drawparallels(parallel_interval, labels=[1, 0, 0, 0], dashes=[90, 8],
-                      linewidth=0.0)
+                      linewidth=0.0, fontsize=12)
     title_arr = [args.title1, args.title2, args.title3]
     title_arr = [x for x in title_arr if x is not None]
     title = "\n".join(title_arr)
-    pm.plot().title(title)
+    pm.plot().title(title, fontsize=20)
 
     # map.drawmapscale(x, y, x, y, 40 , barstyle='fancy')
 
