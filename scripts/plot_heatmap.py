@@ -21,7 +21,7 @@ def main():
     parser.add_argument('-i', '--plot_min', help="min plot value")
     parser.add_argument('-a', '--plot_max', help="max plot value")
     parser.add_argument('-t1', '--title1', help="title1 of plot",
-                        default="Why didn't you add a title?")
+                        default="")
     parser.add_argument('-t2', '--title2', help="title2 of plot")
     parser.add_argument('-t3', '--title3', help="title3 of plot")
     parser.add_argument('-c', '--color', help="Matplotlib Color Pallette",
@@ -42,10 +42,16 @@ def main():
                         default=12)
     parser.add_argument('-ps', '--plotstas', help='Plot Stations',
                         default=False)
+
+    parser.add_argument('-lp', '--legend_pad', help='Legend Padding',
+                        default=0.0)
+    parser.add_argument('-cp', '--colorbar_pad', help='Colorbar Padding',
+                        default=0.2)
+    parser.add_argument('-cf', '--colorbar_fraction', help='Colorbar fraction',
+                        default=0.1)
     args = parser.parse_args()
     MagD = get_pickle(args.path)
     pm = PlotMagD(MagD)
-
     pm.plot().figure(figsize=(int(args.plotwidth), int(args.plotheight)))
     # pm.plot().rc("font", size=14)
 
@@ -98,21 +104,21 @@ def main():
                 unit = MagD.markers[key]['unit']
             pm.plot().scatter(Sx, Sy, s=size, marker=symbol, c=color,
                               label=label, zorder=11)
-            bbox = (0.0, -0.2)
+            bbox = (0.0, float(args.legend_pad))
             pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,
                              scatterpoints=1, fontsize=15)
     if solutions is not None:
         s_lats = [s.obj.lat for s in solutions]
         s_lons = [s.obj.lon for s in solutions]
         Sx, Sy = map(s_lons, s_lats)
-        pm.plot().scatter(Sx, Sy, s=50, marker='D', c="black",
+        pm.plot().scatter(Sx, Sy, s=60, marker='D', c="k",
                           label="Solution", zorder=12)
 
-    clb = pm.plot().colorbar(cf, fraction=0.030, pad=0.04)
+    clb = pm.plot().colorbar(cf, fraction=float(args.colorbar_fraction),
+                             pad=float(args.colorbar_pad))
     # if unit is not None:
     clb.ax.set_title(unit, fontsize=12)
     clb.ax.set_yticklabels(clb.ax.get_yticklabels(), fontsize=12)
-
 
     meridian_interval = pm.meridian_interval(MagD.lon_min, MagD.lon_max)
     # #set linewidth to 0  to get only labels
