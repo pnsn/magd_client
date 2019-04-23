@@ -88,6 +88,12 @@ def main():
     solutions = MagD.firstn_solutions
     unit = None
     if args.plotstas:
+        if solutions is not None:
+            s_lats = [s.obj.lat for s in solutions]
+            s_lons = [s.obj.lon for s in solutions]
+            Sx, Sy = map(s_lons, s_lats)
+            pm.plot().scatter(Sx, Sy, s=60, marker='D', c="k",
+                              label="Contributing stations", zorder=12)
         for key in MagD.markers:
             lats = [dest.lat for dest in MagD.markers[key]['collection']]
             lons = [dest.lon for dest in MagD.markers[key]['collection']]
@@ -104,15 +110,10 @@ def main():
                 unit = MagD.markers[key]['unit']
             pm.plot().scatter(Sx, Sy, s=size, marker=symbol, c=color,
                               label=label, zorder=11)
-            bbox = (0.0, float(args.legend_pad))
-            pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,
-                             scatterpoints=1, fontsize=15)
-    if solutions is not None:
-        s_lats = [s.obj.lat for s in solutions]
-        s_lons = [s.obj.lon for s in solutions]
-        Sx, Sy = map(s_lons, s_lats)
-        pm.plot().scatter(Sx, Sy, s=60, marker='D', c="k",
-                          label="Solution", zorder=12)
+
+    bbox = (0.0, float(args.legend_pad))
+    pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,
+                     scatterpoints=1, fontsize=15)
 
     clb = pm.plot().colorbar(cf, fraction=float(args.colorbar_fraction),
                              pad=float(args.colorbar_pad))
