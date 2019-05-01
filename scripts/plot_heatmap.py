@@ -88,7 +88,7 @@ def main():
     solutions = MagD.firstn_solutions
     unit = None
     if args.plotstas:
-        if solutions is not None:
+        if len(solutions) > 0:
             s_lats = [s.obj.lat for s in solutions]
             s_lons = [s.obj.lon for s in solutions]
             Sx, Sy = map(s_lons, s_lats)
