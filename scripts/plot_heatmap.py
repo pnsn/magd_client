@@ -10,8 +10,17 @@ import argparse
 from argparse import RawTextHelpFormatter
 from matplotlib.ticker import MaxNLocator
 from magD.pickle import get_pickle
-from magD.plotMagD import PlotMagD
+import cartopy.crs as ccrs
+import cartopy.feature as cf
+from cartopy.mpl.gridliner import LONGITUDE_FORMATTER, LATITUDE_FORMATTER
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 
+
+# notes for cartopy
+# conda install -c conda-forge cartopy
+# uninstall brew geos
+# brew uninstall geos
 
 def main():
     parser = argparse.ArgumentParser(description="A routine to plot",
@@ -49,57 +58,62 @@ def main():
                         default=0.2)
     parser.add_argument('-cf', '--colorbar_fraction', help='Colorbar fraction',
                         default=0.1)
+    parser.add_argument('-lnn', '--lon_min', help='lon_min for plot',
+                        required=True)
+    parser.add_argument('-lnx', '--lon_max', help='lon_max for plot',
+                        required=True)
+    parser.add_argument('-ltn', '--lat_min', help='lat_min for plot',
+                        required=True)
+    parser.add_argument('-ltx', '--lat_max', help='lat_max for plot',
+                        required=True)
+    parser.add_argument('-u', '--unit', help='unit to display on colorbar')
     args = parser.parse_args()
+
     MagD = get_pickle(args.path)
-    pm = PlotMagD(MagD)
-    pm.plot().figure(figsize=(int(args.plotwidth), int(args.plotheight)))
-    # pm.plot().rc("font", size=14)
 
-    bounds = (MagD.lat_min, MagD.lat_max, MagD.lon_min,
-              MagD.lon_max)
-    map = pm.basemap(bounds)
-    map.drawcoastlines(zorder=2)
-    map.drawstates(zorder=2)
-    map.drawcountries(zorder=2)
+    plt.figure(figsize=(int(args.plotwidth), int(args.plotheight)))
+    bounds = [float(args.lon_min), float(args.lon_max),
+              float(args.lat_min), float(args.lat_max)]
+    ax = plt.axes(projection=ccrs.Mercator())
+    ax.set_extent(bounds)
+    ax.add_feature(cf.STATES.with_scale('10m'))
+    ax.add_feature(cf.BORDERS.with_scale('10m'))
 
-    X, Y = pm.project_x_y(map)
+    # grid lines and ticks
+    gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
+                      linewidth=0)
+    gl.xformatter = LONGITUDE_FORMATTER
+    gl.yformatter = LATITUDE_FORMATTER
+    gl.xlabels_top = False
+    gl.ylabels_right = False
+    gl.xlabel_style = {'size': 12}
+    gl.ylabel_style = {'size': 12}
 
-    if args.levels is not None:
-        levels = args.levels.split(',')
-        levels = [float(x) for x in levels]
-        levels = np.array(levels)
-        plot_min = np.min(levels)
-        plot_max = np.max(levels)
+    # only plot every 4th starting 1 in from the ends
+    xlabel_steps = range(int(MagD.lon_list()[1]),
+                         int(MagD.lon_list()[-2]))[::4]
 
-    else:
-        plot_min = float(args.plot_min)
-        plot_max = float(args.plot_max)
-        levels = MaxNLocator(nbins=args.nbins).tick_values(plot_min, plot_max)
-    # Z = np.clip(MagD.matrix, plot_min, plot_max)
+    ylabel_steps = range(int(MagD.lat_list()[1]),
+                         int(MagD.lat_list()[-2]))[::4]
+    gl.xlocator = mticker.FixedLocator(xlabel_steps)
+    gl.ylocator = mticker.FixedLocator(ylabel_steps)
 
-    Z = MagD.matrix
-    X = np.array(X) + 0.5 / 2.
-    Y = np.array(Y) + 0.5 / 2.
-    cmap = pm.plot().get_cmap(args.color)
-
-    # norm = BoundaryNorm(levels, ncolors=cmap.N, clip=False)
-    cf = pm.plot().contourf(X, Y, Z, levels=levels, cmap=cmap,
-                            vmim=plot_min, vmax=plot_max)
+    # plot station markers
     solutions = MagD.firstn_solutions
-    unit = None
+    unit = args.unit
     if args.plotstas:
         if len(solutions) > 0:
             s_lats = [s.obj.lat for s in solutions]
             s_lons = [s.obj.lon for s in solutions]
-            Sx, Sy = map(s_lons, s_lats)
-            pm.plot().scatter(Sx, Sy, s=60, marker='D', c="k",
-                              label="Contributing stations", zorder=12)
+            ax.scatter(s_lons, s_lats, s=60, marker='D', c="k",
+                       label="Contributing stations", zorder=12,
+                       transform=ccrs.Geodetic())
         for key in MagD.markers:
             lats = [dest.lat for dest in MagD.markers[key]['collection']]
             lons = [dest.lon for dest in MagD.markers[key]['collection']]
             # find index of list where stations did not contrib to any
             # solution (looosers)
-            Sx, Sy = map(lons, lats)
+            # Sx, Sy = map(lons, lats)
             color = MagD.markers[key]['color']
             symbol = MagD.markers[key]['symbol']
             label = MagD.markers[key]['label']
@@ -108,41 +122,39 @@ def main():
             # once set we don't want to unset units
             if 'unit' in MagD.markers[key] and unit is None:
                 unit = MagD.markers[key]['unit']
-            pm.plot().scatter(Sx, Sy, s=size, marker=symbol, c=color,
-                              label=label, zorder=11)
+            ax.scatter(lons, lats, s=size, marker=symbol, c=color,
+                       label=label, zorder=11, transform=ccrs.Geodetic())
 
-    bbox = (0.0, float(args.legend_pad))
-    pm.plot().legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,
-                     scatterpoints=1, fontsize=15)
+            bbox = (0.0, float(args.legend_pad))
+            plt.legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,
+                       scatterpoints=1, fontsize=15)
+    # contours
+    if args.levels is not None:
+        levels = args.levels.split(',')
+        levels = [float(x) for x in levels]
+        levels = np.array(levels)
+        plot_min = np.min(levels)
+        plot_max = np.max(levels)
 
-    clb = pm.plot().colorbar(cf, fraction=float(args.colorbar_fraction),
-                             pad=float(args.colorbar_pad))
-    # if unit is not None:
-    clb.ax.set_title(unit, fontsize=12)
-    clb.ax.set_yticklabels(clb.ax.get_yticklabels(), fontsize=12)
+        X, Y = np.meshgrid(MagD.lon_list(), MagD.lat_list())
+        Z = MagD.matrix
+        X = np.array(X)
+        Y = np.array(Y)
+        cmap = plt.get_cmap(args.color)
+        clf = ax.contourf(X, Y, Z, levels=levels, cmap=cmap, vmim=plot_min,
+                          vmax=plot_max, transform=ccrs.PlateCarree())
+        # colorbar
+        clb = plt.colorbar(clf, fraction=float(args.colorbar_fraction),
+                           pad=float(args.colorbar_pad))
+        if unit is not None:
+            clb.ax.set_title(unit, fontsize=12)
+            clb.ax.set_yticklabels(clb.ax.get_yticklabels(), fontsize=12)
 
-    meridian_interval = pm.meridian_interval(MagD.lon_min, MagD.lon_max)
-    # #set linewidth to 0  to get only labels
-    map.drawmeridians(meridian_interval, labels=[0, 0, 0, 1], dashes=[90, 8],
-                      linewidth=0.0, fontsize=12)
-    # map.drawmapscale(lon=-120.0, lat= 45.0, lon0=-120.0, lat0=45.0,
-    #    length=50,
-    #     barstyle='simple', fontsize = 14, units='km', yoffset=1,
-    #     labelstyle='simple', fontcolor='k', fillcolor1='w',
-    #     fillcolor2='k', ax=1, format='%d', zorder=1 )
-    parallel_interval = pm.parallel_interval(MagD.lat_min, MagD.lat_max)
-    map.drawparallels(parallel_interval, labels=[1, 0, 0, 0], dashes=[90, 8],
-                      linewidth=0.0, fontsize=12)
     title_arr = [args.title1, args.title2, args.title3]
     title_arr = [x for x in title_arr if x is not None]
     title = "\n".join(title_arr)
-    pm.plot().title(title, fontsize=20)
-
-    # map.drawmapscale(x, y, x, y, 40 , barstyle='fancy')
-
-    # fig_name = pm.outfile_with_stamp('./plots/')
-    # pm.plot().savefig(fig_name)
-    pm.plot().show()
+    plt.title(title, fontsize=20)
+    plt.show()
 
 if __name__ == "__main__":
     main()
