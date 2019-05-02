@@ -2,7 +2,7 @@
 A client for running magD and storing MapGrids (for plotting) and plots
 https://github.com/pnsn/magD
 
-##Installation
+## Installation
 Install magD from package
 `pip install magD`
 Or clone repo
