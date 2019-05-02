@@ -4,8 +4,11 @@ https://github.com/pnsn/magD
 
 ## Installation
 Install magD from package
+
 `pip install magD`
+
 Or clone repo
+
 `pip install . `
 
 # MagD plot steps
