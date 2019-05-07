@@ -1,11 +1,15 @@
 # magd_client
 A client for running magD and storing MapGrids (for plotting) and plots
-
 https://github.com/pnsn/magD
 
-To run locally, clone MagD, then
+## Installation
+Install magD from package
 
-pip3 install .
+`pip install magD`
+
+Or clone repo
+
+`pip install . `
 
 # MagD plot steps
 See notebooks/* for real examples
