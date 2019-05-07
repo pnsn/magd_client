@@ -22,6 +22,15 @@ import matplotlib.ticker as mticker
 # uninstall brew geos
 # brew uninstall geos
 
+def str2bool(v):
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
 def main():
     parser = argparse.ArgumentParser(description="A routine to plot",
                                      formatter_class=RawTextHelpFormatter)
@@ -49,8 +58,10 @@ def main():
                         default=10)
     parser.add_argument('-ph', '--plotheight', help='Plot height in inches',
                         default=12)
-    parser.add_argument('-ps', '--plotstas', help='Plot Stations',
-                        default=False)
+    parser.add_argument('-s', '--stas', help='Plot Stations', dest='plotstas',
+                        action='store_true', default=False)
+    parser.add_argument('-ns', '--no_stas', help="Don't plot stations",
+                        dest='plotstas', action='store_false', default=False)
 
     parser.add_argument('-lp', '--legend_pad', help='Legend Padding',
                         default=0.0)
