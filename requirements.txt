@@ -3,3 +3,4 @@ numpy
 obspy
 matplotlib
 Cartopy
+magD

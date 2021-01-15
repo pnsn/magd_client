@@ -95,8 +95,8 @@ def main():
                       linewidth=0)
     gl.xformatter = LONGITUDE_FORMATTER
     gl.yformatter = LATITUDE_FORMATTER
-    gl.xlabels_top = False
-    gl.ylabels_right = False
+    gl.top_labels = False
+    gl.right_labels = False
     gl.xlabel_style = {'size': 12}
     gl.ylabel_style = {'size': 12}
 
@@ -118,7 +118,7 @@ def main():
             s_lons = [s.obj.lon for s in solutions]
             ax.scatter(s_lons, s_lats, s=60, marker='D', c="k",
                        label="Contributing stations", zorder=12,
-                       transform=ccrs.Geodetic())
+                       transform=ccrs.PlateCarree())
         for key in MagD.markers:
             lats = [dest.lat for dest in MagD.markers[key]['collection']]
             lons = [dest.lon for dest in MagD.markers[key]['collection']]
@@ -134,7 +134,7 @@ def main():
             if 'unit' in MagD.markers[key] and unit is None:
                 unit = MagD.markers[key]['unit']
             ax.scatter(lons, lats, s=size, marker=symbol, c=color,
-                       label=label, zorder=11, transform=ccrs.Geodetic())
+                       label=label, zorder=11, transform=ccrs.PlateCarree())
 
             bbox = (0.0, float(args.legend_pad))
             plt.legend(bbox_to_anchor=bbox, loc=3, borderaxespad=0.,

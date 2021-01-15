@@ -19,7 +19,7 @@ with infile as csvfile:
     reader = csv.reader(csvfile)
     for row in reader:
         if header:
-            writer.writerows([["sta", "chan", "net", "loc", "lat", "lon",
+            writer.writerows([["sta", "chan", "net", "location", "lat", "lon",
                                "depth", "on_date", "off_date", "rate"]])
             header = False
         else:
